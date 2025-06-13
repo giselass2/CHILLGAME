@@ -7,6 +7,7 @@ const ctx = gameCanvas.getContext('2d'); // Obtén el contexto 2D aquí
 
 const main_menu = document.getElementById('main-menu');
 const startButton = document.getElementById('startButton');
+const howToPlayButton = document.getElementById('howToPlayButton'); // NUEVO: Referencia al botón "HOW TO PLAY"
 const profileButton = document.getElementById('profileButton');
 const leaderboardButton = document.getElementById('leaderboardButton');
 const gameOverScreen = document.getElementById('gameOverScreen');
@@ -24,6 +25,9 @@ const profileBackButton = document.getElementById('profileBackButton');
 const leaderboardMenu = document.getElementById('leaderboardMenu');
 const leaderboardList = document.getElementById('leaderboardList');
 const leaderboardBackButton = document.getElementById('leaderboardBackButton');
+
+const howToPlayMenu = document.getElementById('howToPlayMenu'); // NUEVO: Referencia a la pantalla de instrucciones
+const howToPlayBackButton = document.getElementById('howToPlayBackButton'); // NUEVO: Referencia al botón "GOT IT!"
 
 // Telegram WebApp variables
 let tg = window.Telegram.WebApp;
@@ -209,6 +213,7 @@ function showMainMenu() {
     profileMenu.style.display = 'none';
     leaderboardMenu.style.display = 'none';
     gameOverScreen.style.display = 'none';
+    howToPlayMenu.style.display = 'none'; // NUEVO: Oculta la pantalla de instrucciones
     gameCanvas.style.display = 'none';
     tg.MainButton.hide();
 }
@@ -218,6 +223,7 @@ function showProfileMenu() {
     main_menu.style.display = 'none';
     gameOverScreen.style.display = 'none';
     leaderboardMenu.style.display = 'none';
+    howToPlayMenu.style.display = 'none'; // NUEVO: Oculta la pantalla de instrucciones
     gameCanvas.style.display = 'none';
 
     profileTelegramId.textContent = userTelegramId;
@@ -233,6 +239,7 @@ async function showLeaderboardMenu() {
     main_menu.style.display = 'none';
     profileMenu.style.display = 'none';
     gameOverScreen.style.display = 'none';
+    howToPlayMenu.style.display = 'none'; // NUEVO: Oculta la pantalla de instrucciones
     gameCanvas.style.display = 'none';
 
     leaderboardList.innerHTML = '';
@@ -252,10 +259,21 @@ async function showLeaderboardMenu() {
     });
 }
 
+// NUEVA FUNCIÓN: Muestra la pantalla de instrucciones
+function showHowToPlayMenu() {
+    howToPlayMenu.style.display = 'flex'; // Muestra la pantalla de instrucciones
+    main_menu.style.display = 'none';
+    profileMenu.style.display = 'none';
+    leaderboardMenu.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    gameCanvas.style.display = 'none';
+}
+
 
 function startGame() {
     main_menu.style.display = 'none';
     gameOverScreen.style.display = 'none';
+    howToPlayMenu.style.display = 'none'; // NUEVO: Oculta la pantalla de instrucciones
     gameCanvas.style.display = 'block';
     score = 0;
     obstacles = [];
@@ -363,7 +381,7 @@ function gameLoop() {
 
     // Generar nuevos obstáculos
     // Ajusta la probabilidad de aparición si el juego se vuelve muy difícil con un pez grande
-    if (Math.random() < 0.015) { 
+    if (Math.random() < 0.015) {
         obstacles.push(new Obstacle());
     }
 
@@ -375,12 +393,14 @@ function gameLoop() {
 
 // --- Event Listeners ---
 startButton.addEventListener('click', startGame);
+howToPlayButton.addEventListener('click', showHowToPlayMenu); // NUEVO: Listener para el botón "HOW TO PLAY"
 profileButton.addEventListener('click', showProfileMenu);
 leaderboardButton.addEventListener('click', showLeaderboardMenu);
 restartButton.addEventListener('click', startGame);
 backToMainMenuButton.addEventListener('click', showMainMenu);
 profileBackButton.addEventListener('click', showMainMenu);
 leaderboardBackButton.addEventListener('click', showMainMenu);
+howToPlayBackButton.addEventListener('click', showMainMenu); // NUEVO: Listener para el botón "GOT IT!"
 
 // Eventos de teclado para movimiento de 4 direcciones
 document.addEventListener('keydown', (e) => {
