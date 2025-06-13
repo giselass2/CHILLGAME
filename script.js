@@ -7,25 +7,15 @@ const ctx = gameCanvas.getContext('2d');
 
 const main_menu = document.getElementById('main-menu');
 const startButton = document.getElementById('startButton');
-const howToPlayButton = document.getElementById('howToPlayButton'); // Botón Cómo Jugar
+const howToPlayButton = document.getElementById('howToPlayButton');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const finalScoreDisplay = document.getElementById('finalScore');
 const highScoreMessage = document.getElementById('highScoreMessage');
-const restartButton = document.getElementById('restartButton');
-const backToMainMenuButton = document.getElementById('backToMainMenuButton');
+const restartButton = document.getElementById('restartButton'); // Botón de RESTART
+const backToMainMenuButton = document.getElementById('backToMainMenuButton'); // Botón de MAIN MENU
 
-// Referencias a elementos de perfil y leaderboard eliminadas
-// const profileMenu = document.getElementById('profileMenu');
-// const profileTelegramId = document.getElementById('profileTelegramId');
-// const profileUsername = document.getElementById('profileUsername');
-// const profileHighScore = document.getElementById('profileHighScore');
-// const profileBackButton = document.getElementById('profileBackButton');
-// const leaderboardMenu = document.getElementById('leaderboardMenu');
-// const leaderboardList = document.getElementById('leaderboardList');
-// const leaderboardBackButton = document.getElementById('leaderboardBackButton');
-
-const howToPlayMenu = document.getElementById('howToPlayMenu'); // Pantalla de instrucciones
-const howToPlayBackButton = document.getElementById('howToPlayBackButton'); // Botón de vuelta en instrucciones
+const howToPlayMenu = document.getElementById('howToPlayMenu');
+const howToPlayBackButton = document.getElementById('howToPlayBackButton');
 
 // Telegram WebApp variables (mantenidas por si en el futuro se quiere reincorporar)
 let tg = window.Telegram.WebApp;
@@ -37,16 +27,20 @@ let score = 0;
 let gameInterval;
 let obstacles = [];
 let projectiles = [];
-let player; // Nuestro objeto jugador
+let player;
 let keysPressed = {}; // Para el movimiento de 4 direcciones
 
+// Variables para el control táctil
+let touchStartX = 0;
+let touchStartY = 0;
+let isDragging = false; // Estado de arrastre para diferenciar movimiento de disparo táctil
+
 // *** AJUSTES DE TAMAÑO Y VELOCIDAD PARA EL PEZ GIGANTE CON ROPA ***
-// Ajusta estos valores para que el pez se vea y se mueva bien
-const PLAYER_WIDTH = 90; // Ajustado para el pez con ropa (más estrecho que el alto)
-const PLAYER_HEIGHT = 120; // Tamaño del pez ahora es GIGANTE y con la proporción de la imagen
-const PLAYER_SPEED = 6; // Ligeramente aumentada para que un pez grande sea más ágil
-const PROJECTILE_SPEED = 7; // Las balas deben ir rápido
-const OBSTACLE_SPEED = 2.5; // Ligeramente aumentada, pero aún manejable
+const PLAYER_WIDTH = 90;
+const PLAYER_HEIGHT = 120;
+const PLAYER_SPEED = 6;
+const PROJECTILE_SPEED = 7;
+const OBSTACLE_SPEED = 2.5;
 
 // Imágenes del juego (precarga para evitar parpadeos)
 const playerImage = new Image();
@@ -58,15 +52,13 @@ backgroundImage.src = 'fondo_mar.jpg';
 const projectileImage = new Image();
 projectileImage.src = 'burbuja.png';
 
-// Asegúrate de que todas las imágenes se carguen antes de iniciar el juego
 let imagesLoaded = 0;
-const totalImages = 4; // Asegúrate de que este número coincide con las imágenes que tienes
+const totalImages = 4;
 
 function imageLoaded() {
     imagesLoaded++;
     if (imagesLoaded === totalImages) {
         console.log("Todas las imágenes cargadas.");
-        // Una vez que todas las imágenes estén cargadas, muestra el menú principal.
         showMainMenu();
     }
 }
@@ -82,7 +74,7 @@ class Player {
     constructor() {
         this.width = PLAYER_WIDTH;
         this.height = PLAYER_HEIGHT;
-        this.x = gameCanvas.width / 4;
+        this.x = gameCanvas.width / 4 - this.width / 2; // Centrar el jugador horizontalmente
         this.y = gameCanvas.height / 2 - this.height / 2;
     }
 
@@ -113,17 +105,18 @@ class Player {
     }
 
     shoot() {
-        // Dispara un proyectil desde el centro del pez, moviéndose a la derecha
-        projectiles.push(new Projectile(this.x + this.width, this.y + this.height / 2));
+        // Dispara un proyectil desde el "pez" (puntos de origen ajustados para la imagen con ropa)
+        // Puedes ajustar el `0.4` si la burbuja no sale exactamente donde quieres
+        projectiles.push(new Projectile(this.x + this.width, this.y + this.height * 0.4));
     }
 }
 
 class Obstacle {
     constructor() {
-        this.width = 60; // Tamaño del pez globo
+        this.width = 60;
         this.height = 60;
-        this.x = gameCanvas.width; // Empieza desde la derecha
-        this.y = Math.random() * (gameCanvas.height - this.height); // Posición Y aleatoria
+        this.x = gameCanvas.width;
+        this.y = Math.random() * (gameCanvas.height - this.height);
     }
 
     draw() {
@@ -137,10 +130,10 @@ class Obstacle {
 
 class Projectile {
     constructor(x, y) {
-        this.width = 20; // Tamaño de la burbuja/proyectil
+        this.width = 20;
         this.height = 20;
         this.x = x;
-        this.y = y - this.height / 2; // Centrar verticalmente con respecto al disparo del pez
+        this.y = y - this.height / 2;
     }
 
     draw() {
@@ -148,7 +141,7 @@ class Projectile {
     }
 
     update() {
-        this.x += PROJECTILE_SPEED; // Se mueve hacia la derecha
+        this.x += PROJECTILE_SPEED;
     }
 }
 
@@ -162,16 +155,9 @@ if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
     console.log("Telegram Username:", userUsername);
 } else {
     console.warn("Telegram WebApp user data not available. Running in standalone mode.");
-    userTelegramId = "guest_" + Math.random().toString(36).substr(2, 9); // Fallback for testing
+    userTelegramId = "guest_" + Math.random().toString(36).substr(2, 9);
     userUsername = "GuestPlayer";
 }
-
-// --- Funciones de comunicación con Google Apps Script (ELIMINADAS/COMENTADAS) ---
-// Ya no son necesarias si no se usan los botones de perfil/leaderboard
-/*
-async function sendScoreToAppsScript(telegramId, username, currentScore) { ... }
-async function getScoresFromAppsScript() { ... }
-*/
 
 // --- Lógica de Juego y Menús ---
 
@@ -181,13 +167,11 @@ function showMainMenu() {
     howToPlayMenu.style.display = 'none';
     gameCanvas.style.display = 'none';
     tg.MainButton.hide();
-}
 
-// Funciones de perfil y leaderboard eliminadas
-/*
-function showProfileMenu() { ... }
-async function showLeaderboardMenu() { ... }
-*/
+    // Limpiar el estado de las teclas y arrastre cuando volvemos al menú principal
+    keysPressed = {};
+    isDragging = false;
+}
 
 function showHowToPlayMenu() {
     howToPlayMenu.style.display = 'flex';
@@ -200,19 +184,21 @@ function startGame() {
     main_menu.style.display = 'none';
     gameOverScreen.style.display = 'none';
     howToPlayMenu.style.display = 'none';
-    gameCanvas.style.display = 'block'; // Asegura que el canvas se muestre
+    gameCanvas.style.display = 'block';
 
-    // MUY IMPORTANTE: Asegurar que el canvas tenga un tamaño explícito en JS o CSS
-    // Si tu CSS no define un width y height fijo, es mejor hacerlo aquí.
-    // Esto asegura que el canvas no sea de 0x0 y no se vea la pantalla azul.
-    gameCanvas.width = window.innerWidth;  // O un valor fijo como 800
-    gameCanvas.height = window.innerHeight; // O un valor fijo como 600
+    // Asegurar que el canvas tenga un tamaño explícito
+    gameCanvas.width = window.innerWidth;
+    gameCanvas.height = window.innerHeight;
 
     score = 0;
     obstacles = [];
     projectiles = [];
     player = new Player(); // Reiniciar el jugador
     highScoreMessage.textContent = "";
+
+    // Limpiar el estado de las teclas y arrastre al iniciar un nuevo juego
+    keysPressed = {};
+    isDragging = false;
 
     if (gameInterval) clearInterval(gameInterval);
     gameInterval = setInterval(gameLoop, 1000 / 60); // ~60 FPS
@@ -224,8 +210,10 @@ function endGame() {
     gameCanvas.style.display = 'none';
     finalScoreDisplay.textContent = score;
 
-    // Ya no se llama a sendScoreToAppsScript
     highScoreMessage.textContent = "Great job!"; // Mensaje simple sin Apps Script
+    // Limpiar el estado de las teclas y arrastre al finalizar el juego
+    keysPressed = {};
+    isDragging = false;
 }
 
 // --- Colisión (AABB - Axis-Aligned Bounding Box) ---
@@ -238,7 +226,7 @@ function checkCollision(obj1, obj2) {
 
 // --- Bucle principal del juego ---
 function gameLoop() {
-    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Limpiar canvas
+    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
     // Dibuja el fondo
     ctx.drawImage(backgroundImage, 0, 0, gameCanvas.width, gameCanvas.height);
@@ -255,14 +243,14 @@ function gameLoop() {
         // Colisión jugador-obstáculo
         if (checkCollision(player, obstacle)) {
             endGame();
-            return; // Termina el bucle si el juego termina
+            return;
         }
 
         // Eliminar obstáculos fuera de pantalla
         if (obstacle.x + obstacle.width < 0) {
             obstacles.splice(i, 1);
             i--;
-            score += 10; // Puntos por esquivar
+            score += 10;
         }
     }
 
@@ -291,8 +279,8 @@ function gameLoop() {
                 obstacles.splice(j, 1);
                 i--;
                 j--;
-                score += 50; // Puntos por destruir
-                break; // Un proyectil solo puede destruir un obstáculo
+                score += 50;
+                break;
             }
         }
     }
@@ -309,17 +297,23 @@ function gameLoop() {
 }
 
 // --- Event Listeners ---
+
+// Eventos de menú
 startButton.addEventListener('click', startGame);
 howToPlayButton.addEventListener('click', showHowToPlayMenu);
-restartButton.addEventListener('click', startGame);
-backToMainMenuButton.addEventListener('click', showMainMenu);
 howToPlayBackButton.addEventListener('click', showMainMenu);
 
-// Eventos de teclado para movimiento de 4 direcciones
+// Eventos de Game Over
+restartButton.addEventListener('click', startGame);
+backToMainMenuButton.addEventListener('click', showMainMenu);
+
+// Eventos de teclado para movimiento de 4 direcciones y disparo
 document.addEventListener('keydown', (e) => {
-    if (gameCanvas.style.display === 'block') { // Solo si el juego está activo
+    // Solo procesar si el juego está activo (canvas visible)
+    if (gameCanvas.style.display === 'block') {
         keysPressed[e.code] = true;
         if (e.code === 'Space') {
+            // Verifica que el jugador exista antes de disparar
             if (player) {
                 player.shoot();
             }
@@ -328,57 +322,59 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    if (gameCanvas.style.display === 'block') { // Solo si el juego está activo
+    // Solo procesar si el juego está activo
+    if (gameCanvas.style.display === 'block') {
         delete keysPressed[e.code];
     }
 });
 
-// Variables para el control táctil
-let touchStartX = 0;
-let touchStartY = 0;
-let isDragging = false;
-
-// Evento de toque/clic para movimiento y disparo
+// Eventos táctiles para movimiento y disparo
 gameCanvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Previene el desplazamiento por defecto en móviles
+    // Solo si el juego está activo y el jugador existe
     if (gameCanvas.style.display === 'block' && player) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-        isDragging = true;
+        isDragging = false; // Resetea isDragging al inicio del toque
     }
 });
 
 gameCanvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    if (gameCanvas.style.display === 'block' && isDragging && player) {
+    // Solo si el juego está activo y estamos arrastrando
+    if (gameCanvas.style.display === 'block' && player) {
         const touchX = e.touches[0].clientX;
         const touchY = e.touches[0].clientY;
 
         const deltaX = touchX - touchStartX;
         const deltaY = touchY - touchStartY;
 
-        player.x += deltaX;
-        player.y += deltaY;
+        // Si hay un movimiento significativo, es un arrastre
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) { // Umbral de 5 píxeles para considerar arrastre
+            isDragging = true;
+            player.x += deltaX;
+            player.y += deltaY;
 
-        touchStartX = touchX;
-        touchStartY = touchY;
+            // Limita el movimiento dentro del canvas
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > gameCanvas.width) player.x = gameCanvas.width - player.width;
+            if (player.y < 0) player.y = 0;
+            if (player.y + player.height > gameCanvas.height) player.y = gameCanvas.height - player.height;
 
-        // Limita el movimiento dentro del canvas
-        if (player.x < 0) player.x = 0;
-        if (player.x + player.width > gameCanvas.width) player.x = gameCanvas.width - player.width;
-        if (player.y < 0) player.y = 0;
-        if (player.y + player.height > gameCanvas.height) player.y = gameCanvas.height - player.height;
+            // Actualiza la posición de inicio para el siguiente delta
+            touchStartX = touchX;
+            touchStartY = touchY;
+        }
     }
 });
 
 gameCanvas.addEventListener('touchend', (e) => {
-    if (gameCanvas.style.display === 'block') {
+    // Solo si el juego está activo
+    if (gameCanvas.style.display === 'block' && player) {
         // Si no hubo un arrastre significativo, se considera un toque para disparar
-        if (!isDragging || Math.abs(e.changedTouches[0].clientX - touchStartX) < 10 && Math.abs(e.changedTouches[0].clientY - touchStartY) < 10) {
-            if (player) {
-                player.shoot();
-            }
+        if (!isDragging) {
+            player.shoot();
         }
-        isDragging = false;
     }
+    isDragging = false; // Resetea el estado de arrastre
 });
