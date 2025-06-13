@@ -1,26 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChillFish Dodge!</title>
+    <title>CHILLFISH DODGE</title>
     <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
-        <div id="start-screen" class="game-screen">
-            <h1>CHILLFISH DODGE!</h1>
-            <p>Avoid the grumpy Pufferfish!</p>
-            <button id="startButton">START GAME</button>
-            <p class="instruction">Tap or click anywhere on the screen to move ChillFish horizontally!</p>
+
+        <div id="main-menu" class="menu">
+            <h1>CHILLFISH DODGE</h1>
+            <button id="startButton">PLAY</button>
+            <button id="profileButton">PROFILE</button>
+            <button id="leaderboardButton">LEADERBOARD</button>
         </div>
-        <div id="game-over-screen" class="game-screen">
-            <h1>GAME OVER!</h1>
-            <p>You survived for: <span id="finalScore">0</span> seconds</p>
-            <button id="restartButton">PLAY AGAIN</button>
+
+        <div id="gameOverScreen" class="menu" style="display: none;">
+            <h2>GAME OVER</h2>
+            <p>Score: <span id="finalScore">0</span></p>
+            <p id="highScoreMessage"></p>
+            <button id="restartButton">RESTART</button>
+            <button id="backToMainMenuButton">MAIN MENU</button>
         </div>
+
+        <div id="profileMenu" class="menu" style="display: none;">
+            <h2>USER PROFILE</h2>
+            <p>Telegram ID: <span id="profileTelegramId"></span></p>
+            <p>Username: <span id="profileUsername"></span></p>
+            <p>High Score: <span id="profileHighScore"></span></p>
+            <button id="profileBackButton">BACK</button>
+        </div>
+
+        <div id="leaderboardMenu" class="menu" style="display: none;">
+            <h2>LEADERBOARD</h2>
+            <ol id="leaderboardList"></ol>
+            <button id="leaderboardBackButton">BACK</button>
+        </div>
+
     </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
