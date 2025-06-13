@@ -37,9 +37,11 @@ let obstacles = [];
 let projectiles = []; // ¡Nueva array para proyectiles!
 let player; // Nuestro objeto jugador
 let keysPressed = {}; // Para el movimiento de 4 direcciones
-const PLAYER_SPEED = 3; // Velocidad del pez
-const PROJECTILE_SPEED = 5; // Velocidad de las balas
-const OBSTACLE_SPEED = 2; // Velocidad de los obstáculos
+
+// *** AJUSTES DE TAMAÑO Y VELOCIDAD PARA EL PEZ GIGANTE ***
+const PLAYER_SPEED = 5; // Aumentada para que el pez grande sea más ágil
+const PROJECTILE_SPEED = 7; // Las balas deben ir rápido
+const OBSTACLE_SPEED = 2.5; // Ligeramente aumentada, pero aún manejable
 
 // Imágenes del juego (precarga para evitar parpadeos)
 const playerImage = new Image();
@@ -73,8 +75,8 @@ projectileImage.onload = imageLoaded;
 
 class Player {
     constructor() {
-        this.width = 75; // ¡Tamaño del pez aumentado!
-        this.height = 75; // ¡Tamaño del pez aumentado!
+        this.width = 120; // ¡Tamaño del pez ahora es GIGANTE!
+        this.height = 120; // ¡Tamaño del pez ahora es GIGANTE!
         this.x = gameCanvas.width / 4;
         this.y = gameCanvas.height / 2 - this.height / 2;
     }
@@ -360,7 +362,8 @@ function gameLoop() {
 
 
     // Generar nuevos obstáculos
-    if (Math.random() < 0.015) { // Ajusta la probabilidad de aparición
+    // Ajusta la probabilidad de aparición si el juego se vuelve muy difícil con un pez grande
+    if (Math.random() < 0.015) { 
         obstacles.push(new Obstacle());
     }
 
@@ -384,7 +387,9 @@ document.addEventListener('keydown', (e) => {
     keysPressed[e.code] = true;
     // Disparo con espacio o clic (para teclado)
     if (e.code === 'Space') {
-        player.shoot();
+        if (player) { // Asegúrate de que el jugador exista antes de disparar
+            player.shoot();
+        }
     }
 });
 
