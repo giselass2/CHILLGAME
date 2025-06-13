@@ -27,7 +27,7 @@ let score = 0;
 let gameInterval;
 let obstacles = [];
 let projectiles = [];
-let player;
+let player = null; // Inicializar player como null, se creará en startGame()
 let keysPressed = {}; // Para el movimiento de 4 direcciones
 
 // Variables para el control táctil
@@ -53,19 +53,24 @@ const projectileImage = new Image();
 projectileImage.src = 'burbuja.png';
 
 let imagesLoaded = 0;
-const totalImages = 4;
+const totalImages = 4; // Asegúrate de que este número es correcto
 
 function imageLoaded() {
     imagesLoaded++;
+    console.log(`Imagen cargada: ${this.src}. Total cargadas: ${imagesLoaded}/${totalImages}`);
     if (imagesLoaded === totalImages) {
-        console.log("Todas las imágenes cargadas.");
+        console.log("Todas las imágenes cargadas. Mostrando menú principal.");
         showMainMenu();
     }
 }
 playerImage.onload = imageLoaded;
+playerImage.onerror = () => { console.error("Error al cargar playerImage: pez.png"); };
 obstacleImage.onload = imageLoaded;
+obstacleImage.onerror = () => { console.error("Error al cargar obstacleImage: pez_globo.png"); };
 backgroundImage.onload = imageLoaded;
+backgroundImage.onerror = () => { console.error("Error al cargar backgroundImage: fondo_mar.jpg"); };
 projectileImage.onload = imageLoaded;
+projectileImage.onerror = () => { console.error("Error al cargar projectileImage: burbuja.png"); };
 
 
 // --- Clases de Juego ---
@@ -74,12 +79,20 @@ class Player {
     constructor() {
         this.width = PLAYER_WIDTH;
         this.height = PLAYER_HEIGHT;
-        this.x = gameCanvas.width / 4 - this.width / 2; // Centrar el jugador horizontalmente
+        this.x = gameCanvas.width / 4 - this.width / 2;
         this.y = gameCanvas.height / 2 - this.height / 2;
+        console.log("Player creado:", this.x, this.y, this.width, this.height);
     }
 
     draw() {
-        ctx.drawImage(playerImage, this.x, this.y, this.width, this.height);
+        if (playerImage.complete && playerImage.naturalWidth !== 0) {
+            ctx.drawImage(playerImage, this.x, this.y, this.width, this.height);
+        } else {
+            // Dibujar un rectángulo de fallback si la imagen no está cargada
+            ctx.fillStyle = 'purple'; // Para depuración
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            console.warn("Player image not loaded or invalid, drawing fallback rectangle.");
+        }
     }
 
     update() {
@@ -105,9 +118,9 @@ class Player {
     }
 
     shoot() {
-        // Dispara un proyectil desde el "pez" (puntos de origen ajustados para la imagen con ropa)
-        // Puedes ajustar el `0.4` si la burbuja no sale exactamente donde quieres
+        // Dispara un proyectil desde el "pez"
         projectiles.push(new Projectile(this.x + this.width, this.y + this.height * 0.4));
+        console.log("Disparo!");
     }
 }
 
@@ -120,7 +133,13 @@ class Obstacle {
     }
 
     draw() {
-        ctx.drawImage(obstacleImage, this.x, this.y, this.width, this.height);
+        if (obstacleImage.complete && obstacleImage.naturalWidth !== 0) {
+            ctx.drawImage(obstacleImage, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            console.warn("Obstacle image not loaded or invalid, drawing fallback rectangle.");
+        }
     }
 
     update() {
@@ -137,7 +156,15 @@ class Projectile {
     }
 
     draw() {
-        ctx.drawImage(projectileImage, this.x, this.y, this.width, this.height);
+        if (projectileImage.complete && projectileImage.naturalWidth !== 0) {
+            ctx.drawImage(projectileImage, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+            ctx.fill();
+            console.warn("Projectile image not loaded or invalid, drawing fallback circle.");
+        }
     }
 
     update() {
@@ -162,18 +189,27 @@ if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
 // --- Lógica de Juego y Menús ---
 
 function showMainMenu() {
+    console.log("Mostrando Main Menu.");
     main_menu.style.display = 'flex';
     gameOverScreen.style.display = 'none';
     howToPlayMenu.style.display = 'none';
     gameCanvas.style.display = 'none';
-    tg.MainButton.hide();
+    if (tg.MainButton) tg.MainButton.hide(); // Asegúrate de que existe antes de usarlo
 
-    // Limpiar el estado de las teclas y arrastre cuando volvemos al menú principal
+    // Limpiar el estado de las teclas y arrastre
     keysPressed = {};
     isDragging = false;
+    // Detener el bucle del juego si estaba activo
+    if (gameInterval) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+    }
+    // Asegurar que player no esté activo
+    player = null;
 }
 
 function showHowToPlayMenu() {
+    console.log("Mostrando How To Play Menu.");
     howToPlayMenu.style.display = 'flex';
     main_menu.style.display = 'none';
     gameOverScreen.style.display = 'none';
@@ -181,39 +217,46 @@ function showHowToPlayMenu() {
 }
 
 function startGame() {
+    console.log("Iniciando juego.");
     main_menu.style.display = 'none';
     gameOverScreen.style.display = 'none';
     howToPlayMenu.style.display = 'none';
-    gameCanvas.style.display = 'block';
+    gameCanvas.style.display = 'block'; // Asegura que el canvas se muestre
 
-    // Asegurar que el canvas tenga un tamaño explícito
+    // Asegurar que el canvas tenga un tamaño explícito basado en la ventana
     gameCanvas.width = window.innerWidth;
     gameCanvas.height = window.innerHeight;
+    console.log("Canvas size:", gameCanvas.width, gameCanvas.height);
+
 
     score = 0;
     obstacles = [];
     projectiles = [];
-    player = new Player(); // Reiniciar el jugador
+    player = new Player(); // Crear nueva instancia del jugador
     highScoreMessage.textContent = "";
 
     // Limpiar el estado de las teclas y arrastre al iniciar un nuevo juego
     keysPressed = {};
     isDragging = false;
 
-    if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 1000 / 60); // ~60 FPS
+    if (gameInterval) clearInterval(gameInterval); // Limpiar cualquier intervalo anterior
+    gameInterval = setInterval(gameLoop, 1000 / 60); // Iniciar el bucle del juego
+    console.log("Game loop iniciado.");
 }
 
 function endGame() {
+    console.log("Juego terminado. Puntuación:", score);
     clearInterval(gameInterval);
+    gameInterval = null; // Limpiar el intervalo para indicar que el juego está detenido
     gameOverScreen.style.display = 'flex';
     gameCanvas.style.display = 'none';
     finalScoreDisplay.textContent = score;
 
-    highScoreMessage.textContent = "Great job!"; // Mensaje simple sin Apps Script
+    highScoreMessage.textContent = "Great job!";
     // Limpiar el estado de las teclas y arrastre al finalizar el juego
     keysPressed = {};
     isDragging = false;
+    player = null; // Establecer player a null para evitar referencias no válidas
 }
 
 // --- Colisión (AABB - Axis-Aligned Bounding Box) ---
@@ -226,10 +269,22 @@ function checkCollision(obj1, obj2) {
 
 // --- Bucle principal del juego ---
 function gameLoop() {
+    if (!player) { // Si el jugador no existe, algo salió mal, detener o ignorar
+        console.error("gameLoop: Player is null. Stopping gameLoop.");
+        endGame();
+        return;
+    }
+
     ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
     // Dibuja el fondo
-    ctx.drawImage(backgroundImage, 0, 0, gameCanvas.width, gameCanvas.height);
+    if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
+        ctx.drawImage(backgroundImage, 0, 0, gameCanvas.width, gameCanvas.height);
+    } else {
+        ctx.fillStyle = 'blue'; // Fondo de fallback
+        ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+    }
+
 
     player.update();
     player.draw();
@@ -307,13 +362,16 @@ howToPlayBackButton.addEventListener('click', showMainMenu);
 restartButton.addEventListener('click', startGame);
 backToMainMenuButton.addEventListener('click', showMainMenu);
 
-// Eventos de teclado para movimiento de 4 direcciones y disparo
+
+// --- Gestión centralizada de eventos del juego ---
+// Esto ayuda a asegurar que los eventos solo se procesen cuando el juego está activo
+// y evita problemas con elementos superpuestos o enfoque.
+
 document.addEventListener('keydown', (e) => {
     // Solo procesar si el juego está activo (canvas visible)
     if (gameCanvas.style.display === 'block') {
         keysPressed[e.code] = true;
         if (e.code === 'Space') {
-            // Verifica que el jugador exista antes de disparar
             if (player) {
                 player.shoot();
             }
@@ -328,10 +386,8 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Eventos táctiles para movimiento y disparo
 gameCanvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Previene el desplazamiento por defecto en móviles
-    // Solo si el juego está activo y el jugador existe
     if (gameCanvas.style.display === 'block' && player) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
@@ -341,7 +397,6 @@ gameCanvas.addEventListener('touchstart', (e) => {
 
 gameCanvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    // Solo si el juego está activo y estamos arrastrando
     if (gameCanvas.style.display === 'block' && player) {
         const touchX = e.touches[0].clientX;
         const touchY = e.touches[0].clientY;
@@ -349,8 +404,8 @@ gameCanvas.addEventListener('touchmove', (e) => {
         const deltaX = touchX - touchStartX;
         const deltaY = touchY - touchStartY;
 
-        // Si hay un movimiento significativo, es un arrastre
-        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) { // Umbral de 5 píxeles para considerar arrastre
+        // Umbral de 5 píxeles para considerar arrastre
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
             isDragging = true;
             player.x += deltaX;
             player.y += deltaY;
@@ -369,7 +424,6 @@ gameCanvas.addEventListener('touchmove', (e) => {
 });
 
 gameCanvas.addEventListener('touchend', (e) => {
-    // Solo si el juego está activo
     if (gameCanvas.style.display === 'block' && player) {
         // Si no hubo un arrastre significativo, se considera un toque para disparar
         if (!isDragging) {
