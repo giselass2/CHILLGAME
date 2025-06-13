@@ -1,0 +1,89 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Hide scrollbars */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Full viewport height */
+    background-color: #1a1a2e; /* Dark background behind the game */
+    font-family: 'Arial', sans-serif;
+    color: white;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Standard phone width */
+    height: 100vh; /* Use full height on mobile */
+    max-height: 700px; /* Max height for desktop */
+    overflow: hidden;
+    background-color: #282a36; /* Fallback background */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url('fondo_mar.jpg'); /* Your background image */
+    background-size: cover; /* Cover the canvas area */
+    background-repeat: repeat-y; /* Repeat vertically for scrolling effect */
+    background-position: center bottom; /* Start from bottom */
+}
+
+.game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.game-screen h1 {
+    color: #4CAF50; /* Green color for title */
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.game-screen p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.game-screen button {
+    background-color: #007bff; /* Blue button */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.game-screen button:hover {
+    background-color: #0056b3;
+}
+
+.game-screen.hidden {
+    display: none;
+}
+
+.instruction {
+    font-size: 0.9em;
+    color: #bbb;
+    margin-top: 20px;
+}

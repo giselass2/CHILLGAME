@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChillFish Dodge!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="start-screen" class="game-screen">
+            <h1>CHILLFISH DODGE!</h1>
+            <p>Avoid the grumpy Pufferfish!</p>
+            <button id="startButton">START GAME</button>
+            <p class="instruction">Tap or click anywhere on the screen to move ChillFish horizontally!</p>
+        </div>
+        <div id="game-over-screen" class="game-screen">
+            <h1>GAME OVER!</h1>
+            <p>You survived for: <span id="finalScore">0</span> seconds</p>
+            <button id="restartButton">PLAY AGAIN</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
