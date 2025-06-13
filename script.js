@@ -73,8 +73,8 @@ projectileImage.onload = imageLoaded;
 
 class Player {
     constructor() {
-        this.width = 50; // Ajusta el tamaño de tu pez
-        this.height = 50;
+        this.width = 75; // ¡Tamaño del pez aumentado!
+        this.height = 75; // ¡Tamaño del pez aumentado!
         this.x = gameCanvas.width / 4;
         this.y = gameCanvas.height / 2 - this.height / 2;
     }
