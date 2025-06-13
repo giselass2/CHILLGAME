@@ -1,89 +1,147 @@
 body {
     margin: 0;
-    overflow: hidden; /* Hide scrollbars */
+    overflow: hidden; /* Evita barras de desplazamiento */
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Full viewport height */
-    background-color: #1a1a2e; /* Dark background behind the game */
-    font-family: 'Arial', sans-serif;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;   /* Centra verticalmente */
+    min-height: 100vh; /* Ocupa el 100% de la altura de la vista */
+    background-color: #001f3f; /* Color de fondo oscuro para el body */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna */
     color: white;
+    touch-action: manipulation; /* Mejora la respuesta táctil en móviles */
 }
 
 #game-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px; /* Standard phone width */
-    height: 100vh; /* Use full height on mobile */
-    max-height: 700px; /* Max height for desktop */
-    overflow: hidden;
-    background-color: #282a36; /* Fallback background */
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    display: flex;
+    position: relative; /* Contenedor para posicionar menús */
+    width: 100vw; /* Toma todo el ancho disponible */
+    height: 100vh; /* Toma todo el alto disponible */
+    max-width: 600px; /* Limita el ancho máximo para evitar que se vea muy estirado en pantallas grandes */
+    max-height: 800px; /* Limita el alto máximo */
+    display: flex; /* Para centrar el canvas dentro si es necesario */
     justify-content: center;
     align-items: center;
+    background-color: #003366; /* Un azul marino para el contenedor del juego */
+    overflow: hidden; /* Asegura que nada se desborde del contenedor */
 }
 
 canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background-image: url('fondo_mar.jpg'); /* Your background image */
-    background-size: cover; /* Cover the canvas area */
-    background-repeat: repeat-y; /* Repeat vertically for scrolling effect */
-    background-position: center bottom; /* Start from bottom */
+    border: 2px solid #5dadec; /* Borde azul claro */
+    background-color: #0055aa; /* Fondo del canvas */
+    display: block; /* Elimina espacio extra debajo del canvas */
+    width: 100%; /* El canvas ocupa todo el ancho del #game-container */
+    height: 100%; /* El canvas ocupa todo el alto del #game-container */
+    position: absolute; /* Para que los menús lo puedan superponer */
+    top: 0;
+    left: 0;
 }
 
-.game-screen {
-    position: absolute;
+/* Estilos generales para todos los menús (main-menu, gameOverScreen, profileMenu, leaderboardMenu) */
+.menu {
+    position: absolute; /* Se posiciona absolutamente sobre el canvas */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
-    text-align: center;
+    background: rgba(0, 0, 0, 0.85); /* Fondo oscuro semitransparente */
+    display: flex; /* Usa flexbox para centrar y organizar el contenido */
+    flex-direction: column; /* Apila los elementos verticalmente */
+    justify-content: center; /* Centra verticalmente */
+    align-items: center;   /* Centra horizontalmente */
+    z-index: 10; /* Asegura que esté encima del canvas */
     padding: 20px;
-    box-sizing: border-box;
-    z-index: 100;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho/alto */
+    text-align: center; /* Centra el texto dentro del menú */
 }
 
-.game-screen h1 {
-    color: #4CAF50; /* Green color for title */
-    font-size: 2.5em;
-    margin-bottom: 10px;
+.menu h1 {
+    color: #ffd700; /* Oro */
+    font-size: 3em; /* Más grande para el título principal */
+    margin-bottom: 25px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.6); /* Sombra para el texto */
+    letter-spacing: 2px; /* Espaciado entre letras */
 }
 
-.game-screen p {
-    font-size: 1.2em;
+.menu h2 {
+    color: #ffffff; /* Blanco */
+    font-size: 2.2em;
     margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-.game-screen button {
-    background-color: #007bff; /* Blue button */
+.menu p {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    line-height: 1.5; /* Espaciado de línea */
+}
+
+.menu button {
+    background-color: #008cba; /* Azul vibrante */
     color: white;
-    border: none;
     padding: 15px 30px;
-    font-size: 1.5em;
-    border-radius: 8px;
+    border: none;
+    border-radius: 8px; /* Bordes más suaves */
+    font-size: 1.3em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    margin-top: 15px; /* Espacio entre botones */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transiciones suaves */
+    width: 70%; /* Ancho de los botones */
+    max-width: 320px; /* Limite de ancho */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Sombra para los botones */
 }
 
-.game-screen button:hover {
-    background-color: #0056b3;
+.menu button:hover {
+    background-color: #005f7f; /* Azul más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño efecto de elevación */
 }
 
-.game-screen.hidden {
-    display: none;
+.menu button:active {
+    transform: translateY(0); /* Vuelve a la posición normal al hacer clic */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.instruction {
-    font-size: 0.9em;
-    color: #bbb;
-    margin-top: 20px;
+/* Estilos específicos para la lista de ranking */
+#leaderboardList {
+    list-style: none; /* Sin viñetas */
+    padding: 0;
+    text-align: center; /* Centra el texto de los ítems */
+    width: 90%;
+    max-width: 450px;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo de la lista */
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px; /* Espacio debajo de la lista */
+    max-height: 50vh; /* Limitar altura para scroll en dispositivos pequeños */
+    overflow-y: auto; /* Scroll si el contenido es demasiado largo */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* Sombra interna */
+}
+
+#leaderboardList li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Separador más sutil */
+    font-size: 1.2em;
+    display: flex;
+    justify-content: space-between; /* Alinea nombre a un lado, score al otro */
+    align-items: center;
+    color: #f0f0f0; /* Color del texto de la lista */
+}
+
+#leaderboardList li:last-child {
+    border-bottom: none; /* No hay borde en el último elemento */
+}
+
+#leaderboardList li:nth-child(1) { color: #ffd700; font-weight: bold; font-size: 1.4em; } /* Oro para el 1ro */
+#leaderboardList li:nth-child(2) { color: #c0c0c0; font-weight: bold; } /* Plata para el 2do */
+#leaderboardList li:nth-child(3) { color: #cd7f32; font-weight: bold; } /* Bronce para el 3ro */
+
+/* Asegura que el canvas siempre se muestre detrás de los menús cuando estén activos */
+#gameCanvas {
+    z-index: 1;
+}
+
+/* Si un menú está activo, ocultamos los demás */
+#main-menu[style*="display: flex;"],
+#gameOverScreen[style*="display: flex;"],
+#profileMenu[style*="display: flex;"],
+#leaderboardMenu[style*="display: flex;"] {
+    z-index: 20; /* Mayor z-index para el menú activo */
 }
