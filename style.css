@@ -1,91 +1,181 @@
 body {
     margin: 0;
     overflow: hidden; /* Evita barras de desplazamiento */
-    background-color: #333; /* Fondo para el body si el canvas no cubre todo */
-    display: flex; /* Para centrar el game-container si es necesario */
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
+    display: flex; /* Para centrar el game-container */
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;   /* Centra verticalmente */
+    min-height: 100vh; /* Ocupa el 100% de la altura de la vista */
+    background-color: #001f3f; /* Azul oscuro profundo */
+    font-family: 'Poppins', sans-serif; /* Fuente moderna, fallback a sans-serif */
+    color: white;
+    touch-action: manipulation; /* Mejora la respuesta táctil en móviles */
 }
+
+/* Importa una fuente de Google Fonts si quieres usar 'Poppins' */
+@import url('https://fonts.fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
 
 #game-container {
-    position: relative; /* Importante para posicionar los menús sobre el canvas */
-    width: 100vw; /* O un tamaño fijo, por ejemplo, 800px */
-    height: 100vh; /* O un tamaño fijo, por ejemplo, 600px */
-    max-width: 800px; /* Limita el ancho en pantallas grandes */
-    max-height: 600px; /* Limita el alto en pantallas grandes */
-    /* Asegúrate de que el contenedor tiene un tamaño */
-    background-color: #000; /* Fondo de fallback para el contenedor */
-    overflow: hidden; /* Para que el contenido no se salga */
+    position: relative; /* Contenedor para posicionar menús */
+    width: 100vw; /* Toma todo el ancho disponible */
+    height: 100vh; /* Toma todo el alto disponible */
+    max-width: 600px; /* Limita el ancho máximo para pantallas grandes */
+    max-height: 800px; /* Limita el alto máximo */
+    display: flex; /* Para centrar el canvas dentro si es necesario */
+    justify-content: center;
+    align-items: center;
+    background-color: #003366; /* Un azul marino para el contenedor del juego */
+    overflow: hidden; /* Asegura que nada se desborde del contenedor */
+    border-radius: 15px; /* Bordes redondeados para el contenedor del juego */
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.5); /* Sombra acuática sutil */
+    z-index: 1; /* IMPORTANTE: Asegura que el contenedor base está en una capa visible */
 }
 
-#gameCanvas {
-    width: 100%; /* El canvas ocupa el 100% del contenedor */
-    height: 100%; /* El canvas ocupa el 100% del contenedor */
-    display: block; /* Elimina espacios en blanco debajo del canvas */
-    /* background-color: blue; */ /* Comentado porque ahora usaremos la imagen de fondo */
+canvas {
+    border: 3px solid #00c8ff; /* Borde azul brillante */
+    background-color: #0055aa; /* Fondo del canvas */
+    display: block; /* Elimina espacio extra debajo del canvas */
+    width: 100%; /* El canvas ocupa todo el ancho del #game-container */
+    height: 100%; /* El canvas ocupa todo el alto del #game-container */
+    position: absolute; /* Para que los menús lo puedan superponer */
+    top: 0;
+    left: 0;
+    border-radius: 12px; /* Bordes redondeados para el canvas */
+    z-index: 2; /* IMPORTANTE: Asegura que el canvas está encima del contenedor y es interactivo */
 }
 
-/* Estilos para los menús */
+/* Estilos generales para todos los menús (main-menu, gameOverScreen, howToPlayMenu) */
 .menu {
-    position: absolute;
+    position: absolute; /* Se posiciona absolutamente sobre el canvas */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro semitransparente */
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    background: linear-gradient(180deg, rgba(0, 50, 100, 0.9) 0%, rgba(0, 100, 150, 0.9) 100%); /* Degradado azul acuático */
+    display: flex; /* Usa flexbox para centrar y organizar el contenido */
+    flex-direction: column; /* Apila los elementos verticalmente */
+    justify-content: center; /* Centra verticalmente */
+    align-items: center;   /* Centra horizontalmente */
+    z-index: 10; /* IMPORTANTE: Asegura que esté encima del canvas y del juego */
     padding: 20px;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho/alto */
+    text-align: center; /* Centra el texto dentro del menú */
+    border-radius: 15px; /* Mantiene los bordes redondeados del contenedor */
+    box-shadow: inset 0 0 30px rgba(0, 200, 255, 0.3), 0 0 20px rgba(0, 150, 200, 0.4); /* Efecto de luz acuática */
 }
 
-.menu h1, .menu h2 {
-    color: #4CAF50; /* Un color verde para los títulos */
-    margin-bottom: 20px;
+.menu h1 {
+    color: #a7f3d0; /* Verde menta para el título */
+    font-size: 3.5em; /* Un poco más grande */
+    margin-bottom: 30px;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.7), 0 0 8px rgba(0, 150, 200, 0.9); /* Resplandor acuático */
+    letter-spacing: 3px;
+    animation: pulse 2s infinite alternate; /* Animación sutil de pulsación */
 }
 
-.menu button {
-    background-color: #4CAF50; /* Verde brillante */
-    color: white;
-    padding: 15px 30px;
-    margin: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: background-color 0.3s ease;
-    width: 80%; /* Asegura que los botones ocupen un buen ancho */
-    max-width: 250px; /* Limita el ancho máximo */
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.03); }
 }
 
-.menu button:hover {
-    background-color: #45a049; /* Verde un poco más oscuro al pasar el ratón */
+.menu h2 {
+    color: #e0f2f7; /* Azul claro muy suave */
+    font-size: 2.5em;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .menu p {
-    font-size: 1.1em;
-    margin-bottom: 10px;
+    font-size: 1.4em;
+    margin-bottom: 18px;
+    line-height: 1.6;
+    color: #e0f2f7;
 }
 
-.menu ul {
+.menu button {
+    background: linear-gradient(135deg, #00bfff 0%, #008cba 100%); /* Degradado de azul cielo a azul medio */
+    color: white;
+    padding: 18px 35px; /* Más padding para botones más grandes */
+    border: none;
+    border-radius: 30px; /* Botones más redondeados, tipo "píldora" */
+    font-size: 1.4em; /* Fuente más grande para los botones */
+    font-weight: 600; /* Texto en negrita */
+    cursor: pointer;
+    margin-top: 18px; /* Espacio entre botones */
+    transition: all 0.3s ease; /* Transiciones suaves para todos los estados */
+    width: 75%; /* Ancho de los botones */
+    max-width: 350px; /* Limite de ancho */
+    box-shadow: 0 6px 12px rgba(0, 150, 200, 0.4); /* Sombra más pronunciada */
+    text-transform: uppercase; /* Texto en mayúsculas */
+    letter-spacing: 1px;
+}
+
+.menu button:hover {
+    background: linear-gradient(135deg, #00e0ff 0%, #00a0e0 100%); /* Degradado más brillante al pasar el ratón */
+    transform: translateY(-3px) scale(1.02); /* Efecto de elevación y ligero crecimiento */
+    box-shadow: 0 8px 16px rgba(0, 180, 255, 0.6); /* Sombra más difuminada */
+}
+
+.menu button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 100, 150, 0.3);
+    background: linear-gradient(135deg, #008cba 0%, #00bfff 100%); /* Colores invertidos al hacer clic */
+}
+
+/* Estilos específicos para la lista de ranking (aunque no la uses ahora, por si la reincorporas) */
+#leaderboardList {
     list-style: none;
     padding: 0;
-    margin: 10px 0;
-    text-align: left;
-    max-width: 80%;
+    text-align: center;
+    width: 90%;
+    max-width: 480px;
+    background-color: rgba(0, 70, 120, 0.7); /* Fondo de la lista un poco más oscuro */
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    max-height: 55vh;
+    overflow-y: auto;
+    box-shadow: inset 0 0 15px rgba(0, 200, 255, 0.2);
 }
 
-.menu ul li {
-    margin-bottom: 8px;
+#leaderboardList li {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(0, 200, 255, 0.25); /* Separador brillante */
+    font-size: 1.3em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #e0f2f7;
+    transition: background-color 0.2s ease;
 }
 
-.menu h3 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    color: #FFD700; /* Dorado para subtítulos */
+#leaderboardList li:hover {
+    background-color: rgba(0, 120, 180, 0.2); /* Fondo sutil al pasar el ratón por un ítem */
+    border-radius: 8px;
+}
+
+#leaderboardList li:last-child {
+    border-bottom: none;
+}
+
+/* Colores para los top 3 */
+#leaderboardList li:nth-child(1) { color: #ffd700; font-weight: 700; font-size: 1.6em; text-shadow: 0 0 8px #ffd700; } /* Oro */
+#leaderboardList li:nth-child(2) { color: #c0c0c0; font-weight: 600; font-size: 1.4em; text-shadow: 0 0 6px #c0c0c0; } /* Plata */
+#leaderboardList li:nth-child(3) { color: #cd7f32; font-weight: 600; font-size: 1.3em; text-shadow: 0 0 5px #cd7f32; } /* Bronce */
+
+/* Scrollbar personalizado para la lista de ranking */
+#leaderboardList::-webkit-scrollbar {
+    width: 8px;
+}
+#leaderboardList::-webkit-scrollbar-track {
+    background: rgba(0, 50, 100, 0.5);
+    border-radius: 10px;
+}
+#leaderboardList::-webkit-scrollbar-thumb {
+    background: #00c8ff;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+#leaderboardList::-webkit-scrollbar-thumb:hover {
+    background: #00e0ff;
 }
