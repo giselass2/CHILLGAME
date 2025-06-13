@@ -53,7 +53,7 @@ const projectileImage = new Image();
 projectileImage.src = 'burbuja.png';
 
 let imagesLoaded = 0;
-const totalImages = 4; // Asegúrate de que este número es correcto
+const totalImages = 4; // Asegúrate de que este número es correcto (pez, pez_globo, fondo_mar, burbuja)
 
 function imageLoaded() {
     imagesLoaded++;
@@ -79,17 +79,19 @@ class Player {
     constructor() {
         this.width = PLAYER_WIDTH;
         this.height = PLAYER_HEIGHT;
-        this.x = gameCanvas.width / 4 - this.width / 2;
+        // Posición inicial: un cuarto del ancho del canvas, centrado verticalmente
+        this.x = gameCanvas.width / 4 - this.width / 2; // Centrar el jugador horizontalmente
         this.y = gameCanvas.height / 2 - this.height / 2;
         console.log("Player creado:", this.x, this.y, this.width, this.height);
     }
 
     draw() {
+        // Asegúrate de que la imagen esté cargada y sea válida antes de dibujar
         if (playerImage.complete && playerImage.naturalWidth !== 0) {
             ctx.drawImage(playerImage, this.x, this.y, this.width, this.height);
         } else {
             // Dibujar un rectángulo de fallback si la imagen no está cargada
-            ctx.fillStyle = 'purple'; // Para depuración
+            ctx.fillStyle = 'purple'; // Color de depuración para el jugador
             ctx.fillRect(this.x, this.y, this.width, this.height);
             console.warn("Player image not loaded or invalid, drawing fallback rectangle.");
         }
@@ -119,7 +121,9 @@ class Player {
 
     shoot() {
         // Dispara un proyectil desde el "pez"
-        projectiles.push(new Projectile(this.x + this.width, this.y + this.height * 0.4));
+        // Ajusta las coordenadas (x, y) de inicio del proyectil si no salen del lugar esperado
+        // Por ejemplo, para que salga de la boca del pez si está mirando a la derecha
+        projectiles.push(new Projectile(this.x + this.width, this.y + this.height * 0.4)); // Ajuste para que la burbuja salga más de la "boca"
         console.log("Disparo!");
     }
 }
@@ -133,10 +137,11 @@ class Obstacle {
     }
 
     draw() {
+        // Asegúrate de que la imagen esté cargada y sea válida antes de dibujar
         if (obstacleImage.complete && obstacleImage.naturalWidth !== 0) {
             ctx.drawImage(obstacleImage, this.x, this.y, this.width, this.height);
         } else {
-            ctx.fillStyle = 'red';
+            ctx.fillStyle = 'red'; // Color de depuración para el obstáculo
             ctx.fillRect(this.x, this.y, this.width, this.height);
             console.warn("Obstacle image not loaded or invalid, drawing fallback rectangle.");
         }
@@ -156,10 +161,11 @@ class Projectile {
     }
 
     draw() {
+        // Asegúrate de que la imagen esté cargada y sea válida antes de dibujar
         if (projectileImage.complete && projectileImage.naturalWidth !== 0) {
             ctx.drawImage(projectileImage, this.x, this.y, this.width, this.height);
         } else {
-            ctx.fillStyle = 'yellow';
+            ctx.fillStyle = 'yellow'; // Color de depuración para el proyectil
             ctx.beginPath();
             ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
             ctx.fill();
@@ -194,9 +200,9 @@ function showMainMenu() {
     gameOverScreen.style.display = 'none';
     howToPlayMenu.style.display = 'none';
     gameCanvas.style.display = 'none';
-    if (tg.MainButton) tg.MainButton.hide(); // Asegúrate de que existe antes de usarlo
+    if (tg.MainButton) tg.MainButton.hide();
 
-    // Limpiar el estado de las teclas y arrastre
+    // Limpiar el estado de las teclas y arrastre para un inicio limpio
     keysPressed = {};
     isDragging = false;
     // Detener el bucle del juego si estaba activo
@@ -204,7 +210,7 @@ function showMainMenu() {
         clearInterval(gameInterval);
         gameInterval = null;
     }
-    // Asegurar que player no esté activo
+    // Asegurar que player no esté activo o se haya eliminado
     player = null;
 }
 
@@ -224,6 +230,7 @@ function startGame() {
     gameCanvas.style.display = 'block'; // Asegura que el canvas se muestre
 
     // Asegurar que el canvas tenga un tamaño explícito basado en la ventana
+    // Esto es muy importante para que el juego se dibuje correctamente
     gameCanvas.width = window.innerWidth;
     gameCanvas.height = window.innerHeight;
     console.log("Canvas size:", gameCanvas.width, gameCanvas.height);
@@ -232,7 +239,7 @@ function startGame() {
     score = 0;
     obstacles = [];
     projectiles = [];
-    player = new Player(); // Crear nueva instancia del jugador
+    player = new Player(); // Crear nueva instancia del jugador CADA VEZ que el juego inicia
     highScoreMessage.textContent = "";
 
     // Limpiar el estado de las teclas y arrastre al iniciar un nuevo juego
@@ -256,7 +263,7 @@ function endGame() {
     // Limpiar el estado de las teclas y arrastre al finalizar el juego
     keysPressed = {};
     isDragging = false;
-    player = null; // Establecer player a null para evitar referencias no válidas
+    player = null; // Establecer player a null para evitar referencias no válidas en gameLoop
 }
 
 // --- Colisión (AABB - Axis-Aligned Bounding Box) ---
@@ -269,9 +276,10 @@ function checkCollision(obj1, obj2) {
 
 // --- Bucle principal del juego ---
 function gameLoop() {
-    if (!player) { // Si el jugador no existe, algo salió mal, detener o ignorar
+    // Si el jugador no existe (ej. al terminar el juego), detener el bucle
+    if (!player) {
         console.error("gameLoop: Player is null. Stopping gameLoop.");
-        endGame();
+        endGame(); // Asegura que el juego termine correctamente
         return;
     }
 
@@ -281,7 +289,7 @@ function gameLoop() {
     if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
         ctx.drawImage(backgroundImage, 0, 0, gameCanvas.width, gameCanvas.height);
     } else {
-        ctx.fillStyle = 'blue'; // Fondo de fallback
+        ctx.fillStyle = 'blue'; // Fondo de fallback si la imagen no carga
         ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
     }
 
@@ -368,26 +376,25 @@ backToMainMenuButton.addEventListener('click', showMainMenu);
 // y evita problemas con elementos superpuestos o enfoque.
 
 document.addEventListener('keydown', (e) => {
-    // Solo procesar si el juego está activo (canvas visible)
-    if (gameCanvas.style.display === 'block') {
+    // Solo procesar si el juego está activo (canvas visible) y hay un jugador
+    if (gameCanvas.style.display === 'block' && player) {
         keysPressed[e.code] = true;
         if (e.code === 'Space') {
-            if (player) {
-                player.shoot();
-            }
+            player.shoot();
         }
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    // Solo procesar si el juego está activo
-    if (gameCanvas.style.display === 'block') {
+    // Solo procesar si el juego está activo y hay un jugador
+    if (gameCanvas.style.display === 'block' && player) {
         delete keysPressed[e.code];
     }
 });
 
 gameCanvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Previene el desplazamiento por defecto en móviles
+    // Solo si el juego está activo y el jugador existe
     if (gameCanvas.style.display === 'block' && player) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
@@ -397,6 +404,7 @@ gameCanvas.addEventListener('touchstart', (e) => {
 
 gameCanvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
+    // Solo si el juego está activo y el jugador existe
     if (gameCanvas.style.display === 'block' && player) {
         const touchX = e.touches[0].clientX;
         const touchY = e.touches[0].clientY;
@@ -424,6 +432,7 @@ gameCanvas.addEventListener('touchmove', (e) => {
 });
 
 gameCanvas.addEventListener('touchend', (e) => {
+    // Solo si el juego está activo y el jugador existe
     if (gameCanvas.style.display === 'block' && player) {
         // Si no hubo un arrastre significativo, se considera un toque para disparar
         if (!isDragging) {
